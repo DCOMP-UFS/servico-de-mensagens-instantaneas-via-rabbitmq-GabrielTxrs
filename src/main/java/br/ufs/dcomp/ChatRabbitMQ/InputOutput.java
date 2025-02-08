@@ -11,4 +11,8 @@ public class InputOutput {
     public static boolean isUsuario(String nomeUsuario) {
         return nomeUsuario.charAt(0) == '@';
     }
+
+    public static boolean isGrupo(String entrada) {
+        return entrada.split(" ")[0].equalsIgnoreCase("!newGroup");
+    }
 }

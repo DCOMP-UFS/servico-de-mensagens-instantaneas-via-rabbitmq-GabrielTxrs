@@ -7,11 +7,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeoutException;
 
 public class Main {
-    private static final String HOST = "100.26.100.102";
+    private static final String HOST = "52.91.199.175";
     private static final String USERNAME = "admin";
     private static final String PASSWORD = "password";
     private static final String PROMPT = ">> ";
 
+    
     public static void main(String[] args) throws IOException, TimeoutException {
         Connection connection = Chat.iniciarConexao(HOST, USERNAME, PASSWORD);
         Channel channel = Chat.iniciarCanal(connection);
@@ -39,8 +40,11 @@ public class Main {
                 nomeDestinatario = entrada;
                 channel.queueDeclare(nomeDestinatario.substring(1), false, false, false, null);
                 System.out.println("entrou no loop");
-                channel.basicConsume(nomeDestinatario, true, consumer);
+                channel.basicConsume(nomeDestinatario.substring(1), true, consumer);
                 continue;
+            }
+            if(InputOutput.isGrupo(entrada)) {
+                Chat.criarGrupo(entrada.split(" ")[1]);
             }
             String mensagem = entrada;
             System.out.println(mensagem);

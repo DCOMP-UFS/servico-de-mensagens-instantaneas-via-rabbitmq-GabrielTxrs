@@ -28,11 +28,16 @@ echo "deb https://dl.bintray.com/rabbitmq-erlang/debian focal erlang-22.x" | sud
 sudo apt install rabbitmq-server --fix-missing
 ```
 
+## INICIAR RABBITMQ
 ```
 sudo systemctl start rabbitmq-server.service
+```
+```
 sudo systemctl enable rabbitmq-server.service
 ```
-
+```
+sudo rabbitmq-plugins enable rabbitmq_management
+```
 
 ### Passo 3 – Criar Admin User no RabbitMQ
 

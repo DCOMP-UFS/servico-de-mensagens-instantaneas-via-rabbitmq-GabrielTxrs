@@ -24,5 +24,8 @@ public class Chat {
             throw new RuntimeException(e);
         }
     }
+    public static void criarGrupo(String nomeGrupo) {
+        System.out.println(nomeGrupo);
+    }
 }
 
