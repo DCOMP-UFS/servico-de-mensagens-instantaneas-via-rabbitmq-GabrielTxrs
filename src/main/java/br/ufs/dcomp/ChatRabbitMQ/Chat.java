@@ -25,7 +25,23 @@ public class Chat {
         }
     }
     public static void criarGrupo(String nomeGrupo) {
-        System.out.println(nomeGrupo);
+        System.out.println("Grupo Criado: "+nomeGrupo);
+    }
+
+    public static void deletarGrupo(String nomeGrupo) {
+        System.out.println("Grupo Deletado: "+nomeGrupo);
+    }
+
+    public static void removerUsuarioGrupo(String usuario, String nomeGrupo) {
+        System.out.println("Usuario: "+usuario+" removido do grupo: "+nomeGrupo);
+    }
+
+    public static void enviarMensagem(Channel channel, MensagemOuterClass.Mensagem mensagem) {
+//        if(destinatario == null || destinatario.isBlank() || mensagem == null || mensagem.isBlank()) {
+//            System.out.println("Não foi possível enviar a mensagem");
+//            return;
+//        }
+//        System.out.println("Destinatario: "+destinatario+" mensagem: "+mensagem);
     }
 }
 
