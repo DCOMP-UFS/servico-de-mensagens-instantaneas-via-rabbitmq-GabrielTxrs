@@ -38,10 +38,10 @@ public class Chat {
     }
 
     public static void enviarMensagem(Channel channel, MensagemOuterClass.Mensagem mensagem) {
-        if (!isMensagemValida(mensagem)) {
-            System.out.println("Não foi possível enviar a mensagem");
-            return;
-        }
+//        if (!isMensagemValida(mensagem)) {
+//            System.out.println("Não foi possível enviar a mensagem");
+//            return;
+//        }
         try {
             channel.basicPublish("", mensagem.getGrupo().substring(1), null, mensagem.toByteArray());
         } catch (IOException e) {
@@ -49,16 +49,14 @@ public class Chat {
         }
     }
 
-    private static boolean isMensagemValida(MensagemOuterClass.Mensagem mensagem) {
-        return mensagem.hasConteudo() && !mensagem.getConteudo().getNome().isBlank()
-                && !mensagem.getConteudo().getTipo().isBlank() && !mensagem.getConteudo().getCorpo().isEmpty()
-                && mensagem.hasField(MensagemOuterClass.Mensagem.getDescriptor().findFieldByName("emissor"))
-                && mensagem.hasField(MensagemOuterClass.Mensagem.getDescriptor().findFieldByName("data"))
-                && mensagem.hasField(MensagemOuterClass.Mensagem.getDescriptor().findFieldByName("hora"))
-                && mensagem.hasField(MensagemOuterClass.Mensagem.getDescriptor().findFieldByName("grupo"))
-                && mensagem.hasField(MensagemOuterClass.Conteudo.getDescriptor().findFieldByName("tipo"))
-                && mensagem.hasField(MensagemOuterClass.Conteudo.getDescriptor().findFieldByName("corpo"))
-                && mensagem.hasField(MensagemOuterClass.Conteudo.getDescriptor().findFieldByName("nome"));
-    }
+//    private static boolean isMensagemValida(MensagemOuterClass.Mensagem mensagem) {
+//        return mensagem.hasField(MensagemOuterClass.Mensagem.getDescriptor().findFieldByName("emissor"))
+//                && mensagem.hasField(MensagemOuterClass.Mensagem.getDescriptor().findFieldByName("data"))
+//                && mensagem.hasField(MensagemOuterClass.Mensagem.getDescriptor().findFieldByName("hora"))
+//                && mensagem.hasField(MensagemOuterClass.Mensagem.getDescriptor().findFieldByName("grupo"))
+//                && mensagem.hasField(MensagemOuterClass.Conteudo.getDescriptor().findFieldByName("tipo"))
+//                && mensagem.hasField(MensagemOuterClass.Conteudo.getDescriptor().findFieldByName("corpo"))
+//                && mensagem.hasField(MensagemOuterClass.Conteudo.getDescriptor().findFieldByName("nome"));
+//    }
 }
 

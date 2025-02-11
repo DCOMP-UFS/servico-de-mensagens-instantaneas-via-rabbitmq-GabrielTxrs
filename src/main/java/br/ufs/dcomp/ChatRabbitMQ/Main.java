@@ -1,6 +1,7 @@
 package br.ufs.dcomp.ChatRabbitMQ;
 
 import com.google.protobuf.ByteString;
+import com.google.protobuf.InvalidProtocolBufferException;
 import com.rabbitmq.client.*;
 
 import java.io.IOException;
@@ -13,7 +14,7 @@ import java.util.Date;
 import java.util.concurrent.TimeoutException;
 
 public class Main {
-    private static final String HOST = "3.83.136.248";
+    private static final String HOST = "172.24.145.223";
     private static final String USERNAME = "admin";
     private static final String PASSWORD = "password";
     private static final String PROMPT = ">> ";
@@ -34,19 +35,24 @@ public class Main {
 
         channel.queueDeclare(nomeUsuario, false, false, false, null);
         Consumer consumer = new DefaultConsumer(channel) {
-            public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws UnsupportedEncodingException {
-                String message = new String(body, StandardCharsets.UTF_8);
-                String sender = properties.getHeaders().get("sender").toString();
-                String timestamp = new SimpleDateFormat("dd/MM/yyyy 'às' HH:mm").format(new Date());
-                String group = envelope.getExchange().isEmpty() ? "" : "#" + envelope.getExchange();
-                System.out.println("(" + timestamp + ") " + sender + group + " diz: " + message);
+            public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws InvalidProtocolBufferException {
+                MensagemOuterClass.Mensagem mensagemRecebida = MensagemOuterClass.Mensagem.parseFrom(body);
+                String sender = mensagemRecebida.getEmissor();
+                String data = mensagemRecebida.getData();
+                String hora = mensagemRecebida.getHora();
+                String conteudo = mensagemRecebida.getConteudo().getCorpo().toStringUtf8();
+
+                System.out.println("(" + data + " às " + hora + ") " + sender + " diz: " + conteudo);
+                synchronized (System.out) {
+                    System.out.print(mensagemRecebida.getGrupo().concat(PROMPT));
+                }
             }
         };
         channel.basicConsume(nomeUsuario, true, consumer);
         String nomeDestinatario = "";
 
         while (true) {
-            System.out.print(nomeDestinatario.concat(PROMPT));
+            System.out.print(PROMPT);
             String entrada = InputOutput.lerLinha();
             if (entrada.equalsIgnoreCase("exit") || entrada.equalsIgnoreCase("sair")) {
                 break;
@@ -58,7 +64,7 @@ public class Main {
                 channel.basicConsume(nomeDestinatario.substring(1), true, consumer);
             } else {
                 InputOutput.getComando(entrada);
-                if (!InputOutput.isComando(entrada)) {
+                if (!InputOutput.isComando(entrada) && !nomeDestinatario.isBlank()) {
                     MensagemOuterClass.Conteudo conteudo = MensagemOuterClass.Conteudo.newBuilder()
                             .setTipo(String.valueOf(MensagemOuterClass.Conteudo.TIPO_FIELD_NUMBER))
                             .setCorpo(ByteString.copyFromUtf8(entrada)).build();
