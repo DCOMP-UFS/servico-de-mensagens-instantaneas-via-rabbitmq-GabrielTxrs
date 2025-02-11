@@ -15,7 +15,7 @@
                     <archive>
                         <manifest>
                             <mainClass>
-                                br.ufs.dcomp.ChatRabbitMQ.Chat
+                                br.ufs.dcomp.ChatRabbitMQ.Main
                             </mainClass>
                         </manifest>
                     </archive>
