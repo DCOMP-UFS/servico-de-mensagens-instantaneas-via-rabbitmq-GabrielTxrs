@@ -4,7 +4,8 @@ message Mensagem {
   string data = 2; // Data de envio
   string hora = 3; // Hora de envio
   string grupo = 4; // Informa o nome do grupo, se a mensagem for para um grupo
-  Conteudo conteudo = 5;
+  string destinatario = 5;
+  Conteudo conteudo = 6;
 }
 
 message Conteudo {

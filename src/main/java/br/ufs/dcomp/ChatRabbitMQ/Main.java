@@ -5,13 +5,12 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import com.rabbitmq.client.*;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.Date;
 import java.util.concurrent.TimeoutException;
+
+import static br.ufs.dcomp.ChatRabbitMQ.Chat.*;
+import static br.ufs.dcomp.ChatRabbitMQ.InputOutput.*;
 
 public class Main {
     private static final String HOST = "172.24.145.223";
@@ -21,17 +20,18 @@ public class Main {
 
 
     public static void main(String[] args) throws IOException, TimeoutException {
-        Connection connection = Chat.iniciarConexao(HOST, USERNAME, PASSWORD);
-        Channel channel = Chat.iniciarCanal(connection);
+        Connection connection = iniciarConexao(HOST, USERNAME, PASSWORD);
+        Channel channel = iniciarCanal(connection);
 
         iniciarChat(channel);
+
         channel.close();
         connection.close();
     }
 
     public static void iniciarChat(Channel channel) throws IOException {
         System.out.print("User: ");
-        String nomeUsuario = InputOutput.lerLinha();
+        String nomeUsuario = lerLinha();
 
         channel.queueDeclare(nomeUsuario, false, false, false, null);
         Consumer consumer = new DefaultConsumer(channel) {
@@ -39,32 +39,39 @@ public class Main {
                 MensagemOuterClass.Mensagem mensagemRecebida = MensagemOuterClass.Mensagem.parseFrom(body);
                 String sender = mensagemRecebida.getEmissor();
                 String data = mensagemRecebida.getData();
-                String hora = mensagemRecebida.getHora();
+                String hora = mensagemRecebida.getHora().substring(0, 5);
                 String conteudo = mensagemRecebida.getConteudo().getCorpo().toStringUtf8();
+                String grupo = mensagemRecebida.getGrupo();
 
-                System.out.println("(" + data + " às " + hora + ") " + sender + " diz: " + conteudo);
                 synchronized (System.out) {
-                    System.out.print(mensagemRecebida.getGrupo().concat(PROMPT));
+                    System.out.println("(" + data + " às " + hora + ") " + sender+"#"+grupo + " diz: " + conteudo);
+                    System.out.print(grupo.concat(PROMPT));
                 }
             }
         };
         channel.basicConsume(nomeUsuario, true, consumer);
         String nomeDestinatario = "";
+        String nomeGrupo = "";
 
         while (true) {
-            System.out.print(PROMPT);
-            String entrada = InputOutput.lerLinha();
+            System.out.print(nomeDestinatario.concat(PROMPT));
+            String entrada = lerLinha();
             if (entrada.equalsIgnoreCase("exit") || entrada.equalsIgnoreCase("sair")) {
                 break;
             }
-            if (InputOutput.isAlterarDestinatario(entrada)) {
+            if (isAlterarDestinatario(entrada)) {
                 String[] parametros = entrada.split(" ");
+                if(isGrupo(entrada)) {
+                    nomeGrupo = parametros[0];
+                    criarGrupo(nomeUsuario, channel, nomeGrupo.substring(1));
+                }
                 nomeDestinatario = parametros[0];
                 channel.queueDeclare(nomeDestinatario.substring(1), false, false, false, null);
                 channel.basicConsume(nomeDestinatario.substring(1), true, consumer);
             } else {
-                InputOutput.getComando(entrada);
-                if (!InputOutput.isComando(entrada) && !nomeDestinatario.isBlank()) {
+                getComando(nomeUsuario, channel, entrada);
+
+                if (!isComando(entrada) && !nomeDestinatario.isBlank()) {
                     MensagemOuterClass.Conteudo conteudo = MensagemOuterClass.Conteudo.newBuilder()
                             .setTipo(String.valueOf(MensagemOuterClass.Conteudo.TIPO_FIELD_NUMBER))
                             .setCorpo(ByteString.copyFromUtf8(entrada)).build();
@@ -73,9 +80,9 @@ public class Main {
                             .setEmissor(nomeUsuario)
                             .setData(LocalDate.now().toString())
                             .setHora(LocalTime.now().toString())
-                            .setGrupo(nomeDestinatario)
+                            .setGrupo(nomeDestinatario.substring(1))
                             .setConteudo(conteudo).build();
-                    Chat.enviarMensagem(channel, mensagem);
+                    enviarMensagem(channel, mensagem, nomeDestinatario.equals(nomeGrupo));
                 }
             }
         }
