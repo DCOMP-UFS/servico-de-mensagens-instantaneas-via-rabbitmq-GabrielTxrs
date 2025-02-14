@@ -69,8 +69,9 @@ public class Chat {
         try {
             if(isGrupo) {
                 channel.basicPublish(mensagem.getGrupo(), "", null, mensagem.toByteArray());
+            } else {
+                channel.basicPublish("", mensagem.getGrupo(), null, mensagem.toByteArray());
             }
-            channel.basicPublish("", mensagem.getGrupo(), null, mensagem.toByteArray());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
