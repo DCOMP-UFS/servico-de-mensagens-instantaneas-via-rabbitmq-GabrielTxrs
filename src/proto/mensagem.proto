@@ -12,4 +12,5 @@ message Conteudo {
   string tipo = 1; // Tipo do conteúdo no padrão de tipos MIME. Exemplos: "text/plain", "image/png"
   bytes corpo = 2; // Sequência de bytes que compõe o corpo da mensagem
   string nome = 3; // Nome do conteúdo, se existente. Exemplos: "logo_ufs.png", "index.html"
+  bool isArquivo = 4; // Indica se o conteúdo é um arquivo
 }

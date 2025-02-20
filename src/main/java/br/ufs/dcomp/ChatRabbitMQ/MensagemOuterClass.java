@@ -1581,6 +1581,16 @@ public final class MensagemOuterClass {
      */
     com.google.protobuf.ByteString
         getNomeBytes();
+
+    /**
+     * <pre>
+     * Indica se o conteúdo é um arquivo
+     * </pre>
+     *
+     * <code>bool isArquivo = 4;</code>
+     * @return The isArquivo.
+     */
+    boolean getIsArquivo();
   }
   /**
    * Protobuf type {@code Conteudo}
@@ -1645,6 +1655,11 @@ public final class MensagemOuterClass {
               java.lang.String s = input.readStringRequireUtf8();
 
               nome_ = s;
+              break;
+            }
+            case 32: {
+
+              isArquivo_ = input.readBool();
               break;
             }
             default: {
@@ -1786,6 +1801,21 @@ public final class MensagemOuterClass {
       }
     }
 
+    public static final int ISARQUIVO_FIELD_NUMBER = 4;
+    private boolean isArquivo_;
+    /**
+     * <pre>
+     * Indica se o conteúdo é um arquivo
+     * </pre>
+     *
+     * <code>bool isArquivo = 4;</code>
+     * @return The isArquivo.
+     */
+    @java.lang.Override
+    public boolean getIsArquivo() {
+      return isArquivo_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -1809,6 +1839,9 @@ public final class MensagemOuterClass {
       if (!getNomeBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 3, nome_);
       }
+      if (isArquivo_ != false) {
+        output.writeBool(4, isArquivo_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -1827,6 +1860,10 @@ public final class MensagemOuterClass {
       }
       if (!getNomeBytes().isEmpty()) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, nome_);
+      }
+      if (isArquivo_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(4, isArquivo_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -1849,6 +1886,8 @@ public final class MensagemOuterClass {
           .equals(other.getCorpo())) return false;
       if (!getNome()
           .equals(other.getNome())) return false;
+      if (getIsArquivo()
+          != other.getIsArquivo()) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -1866,6 +1905,9 @@ public final class MensagemOuterClass {
       hash = (53 * hash) + getCorpo().hashCode();
       hash = (37 * hash) + NOME_FIELD_NUMBER;
       hash = (53 * hash) + getNome().hashCode();
+      hash = (37 * hash) + ISARQUIVO_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getIsArquivo());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -2005,6 +2047,8 @@ public final class MensagemOuterClass {
 
         nome_ = "";
 
+        isArquivo_ = false;
+
         return this;
       }
 
@@ -2034,6 +2078,7 @@ public final class MensagemOuterClass {
         result.tipo_ = tipo_;
         result.corpo_ = corpo_;
         result.nome_ = nome_;
+        result.isArquivo_ = isArquivo_;
         onBuilt();
         return result;
       }
@@ -2092,6 +2137,9 @@ public final class MensagemOuterClass {
         if (!other.getNome().isEmpty()) {
           nome_ = other.nome_;
           onChanged();
+        }
+        if (other.getIsArquivo() != false) {
+          setIsArquivo(other.getIsArquivo());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -2359,6 +2407,49 @@ public final class MensagemOuterClass {
         onChanged();
         return this;
       }
+
+      private boolean isArquivo_ ;
+      /**
+       * <pre>
+       * Indica se o conteúdo é um arquivo
+       * </pre>
+       *
+       * <code>bool isArquivo = 4;</code>
+       * @return The isArquivo.
+       */
+      @java.lang.Override
+      public boolean getIsArquivo() {
+        return isArquivo_;
+      }
+      /**
+       * <pre>
+       * Indica se o conteúdo é um arquivo
+       * </pre>
+       *
+       * <code>bool isArquivo = 4;</code>
+       * @param value The isArquivo to set.
+       * @return This builder for chaining.
+       */
+      public Builder setIsArquivo(boolean value) {
+        
+        isArquivo_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Indica se o conteúdo é um arquivo
+       * </pre>
+       *
+       * <code>bool isArquivo = 4;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearIsArquivo() {
+        
+        isArquivo_ = false;
+        onChanged();
+        return this;
+      }
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -2434,9 +2525,9 @@ public final class MensagemOuterClass {
       "\n\030src/proto/mensagem.proto\"y\n\010Mensagem\022\017" +
       "\n\007emissor\030\001 \001(\t\022\014\n\004data\030\002 \001(\t\022\014\n\004hora\030\003 " +
       "\001(\t\022\r\n\005grupo\030\004 \001(\t\022\024\n\014destinatario\030\005 \001(\t" +
-      "\022\033\n\010conteudo\030\006 \001(\0132\t.Conteudo\"5\n\010Conteud" +
+      "\022\033\n\010conteudo\030\006 \001(\0132\t.Conteudo\"H\n\010Conteud" +
       "o\022\014\n\004tipo\030\001 \001(\t\022\r\n\005corpo\030\002 \001(\014\022\014\n\004nome\030\003" +
-      " \001(\tb\006proto3"
+      " \001(\t\022\021\n\tisArquivo\030\004 \001(\010b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -2453,7 +2544,7 @@ public final class MensagemOuterClass {
     internal_static_Conteudo_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_Conteudo_descriptor,
-        new java.lang.String[] { "Tipo", "Corpo", "Nome", });
+        new java.lang.String[] { "Tipo", "Corpo", "Nome", "IsArquivo", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)
