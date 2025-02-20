@@ -65,12 +65,12 @@ public class Chat {
         System.out.println("Usuario: " + usuarioRemovido + " removido do grupo: " + nomeGrupo);
     }
 
-    public static void enviarMensagem(Channel channel, MensagemOuterClass.Mensagem mensagem, boolean isGrupo) {
+    public static void enviarMensagem(Channel channel, MensagemOuterClass.Mensagem mensagem) {
         try {
-            if(isGrupo) {
+            if(!mensagem.getGrupo().isEmpty()) {
                 channel.basicPublish(mensagem.getGrupo(), "", null, mensagem.toByteArray());
             } else {
-                channel.basicPublish("", mensagem.getGrupo(), null, mensagem.toByteArray());
+                channel.basicPublish("", mensagem.getDestinatario(), null, mensagem.toByteArray());
             }
         } catch (IOException e) {
             throw new RuntimeException(e);

@@ -42,10 +42,16 @@ public class Main {
                 String hora = mensagemRecebida.getHora().substring(0, 5);
                 String conteudo = mensagemRecebida.getConteudo().getCorpo().toStringUtf8();
                 String grupo = mensagemRecebida.getGrupo();
+                String destinatario = mensagemRecebida.getDestinatario();
 
                 synchronized (System.out) {
-                    System.out.println("(" + data + " às " + hora + ") " + sender+"#"+grupo + " diz: " + conteudo);
-                    System.out.print(grupo.concat(PROMPT));
+                    if (!grupo.isEmpty()) {
+                        System.out.println("\n(" + data + " às " + hora + ") " + sender + "#" + grupo + " diz: " + conteudo);
+                        System.out.print("#" + grupo.concat(PROMPT));
+                    } else {
+                        System.out.println("\n(" + data + " às " + hora + ") " + sender + "@" + destinatario + " diz: " + conteudo);
+                        System.out.print("@" + destinatario.concat(PROMPT));
+                    }
                 }
             }
         };
@@ -54,24 +60,35 @@ public class Main {
         String nomeGrupo = "";
 
         while (true) {
-            System.out.print(nomeDestinatario.concat(PROMPT));
+            if (!nomeDestinatario.isEmpty() ^ !nomeGrupo.isEmpty()) {
+                if (!nomeDestinatario.isEmpty()) {
+                    System.out.print("@");
+                } else {
+                    System.out.print("#");
+                }
+            }
+            System.out.print(nomeDestinatario + nomeGrupo.concat(PROMPT));
             String entrada = lerLinha();
             if (entrada.equalsIgnoreCase("exit") || entrada.equalsIgnoreCase("sair")) {
                 break;
             }
-            if (isAlterarDestinatario(entrada)) {
+            if (isAlterarDestinatarioGrupo(entrada)) {
                 String[] parametros = entrada.split(" ");
-                if(isGrupo(entrada)) {
-                    nomeGrupo = parametros[0];
-                    criarGrupo(nomeUsuario, channel, nomeGrupo.substring(1));
+                if (isGrupo(entrada)) {
+                    nomeGrupo = parametros[0].substring(1);
+                    nomeDestinatario = "";
+                    criarGrupo(nomeUsuario, channel, nomeGrupo);
                 }
-                nomeDestinatario = parametros[0];
-                channel.queueDeclare(nomeDestinatario.substring(1), false, false, false, null);
-                channel.basicConsume(nomeDestinatario.substring(1), true, consumer);
+                if (isDestinatario(entrada)) {
+                    nomeDestinatario = parametros[0].substring(1);
+                    nomeGrupo = "";
+                    channel.queueDeclare(nomeDestinatario, false, false, false, null);
+                    channel.basicConsume(nomeDestinatario, true, consumer);
+                }
             } else {
                 getComando(nomeUsuario, channel, entrada);
 
-                if (!isComando(entrada) && !nomeDestinatario.isBlank()) {
+                if (!isComando(entrada) && (!nomeDestinatario.isEmpty() || !nomeGrupo.isEmpty())) {
                     MensagemOuterClass.Conteudo conteudo = MensagemOuterClass.Conteudo.newBuilder()
                             .setTipo(String.valueOf(MensagemOuterClass.Conteudo.TIPO_FIELD_NUMBER))
                             .setCorpo(ByteString.copyFromUtf8(entrada)).build();
@@ -80,9 +97,10 @@ public class Main {
                             .setEmissor(nomeUsuario)
                             .setData(LocalDate.now().toString())
                             .setHora(LocalTime.now().toString())
-                            .setGrupo(nomeDestinatario.substring(1))
+                            .setDestinatario(nomeDestinatario)
+                            .setGrupo(nomeGrupo)
                             .setConteudo(conteudo).build();
-                    enviarMensagem(channel, mensagem, nomeDestinatario.equals(nomeGrupo));
+                    enviarMensagem(channel, mensagem);
                 }
             }
         }

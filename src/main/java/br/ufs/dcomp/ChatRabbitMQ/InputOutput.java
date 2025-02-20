@@ -26,12 +26,15 @@ public class InputOutput {
         return true;
     }
 
-    public static boolean isAlterarDestinatario(String entrada) {
+    public static boolean isAlterarDestinatarioGrupo(String entrada) {
         return !entrada.isBlank() && entrada.charAt(0) == '@' || entrada.charAt(0) == '#';
     }
 
     public static boolean isGrupo(String entrada) {
         return !entrada.isBlank() && entrada.charAt(0) == '#';
+    }
+    public static boolean isDestinatario(String entrada) {
+        return !entrada.isBlank() && entrada.charAt(0) == '@';
     }
 
     public static boolean isComando(String entrada) {
