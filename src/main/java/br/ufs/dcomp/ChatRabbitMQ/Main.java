@@ -3,20 +3,27 @@ package br.ufs.dcomp.ChatRabbitMQ;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.rabbitmq.client.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.concurrent.TimeoutException;
 
 import static br.ufs.dcomp.ChatRabbitMQ.Chat.*;
 import static br.ufs.dcomp.ChatRabbitMQ.InputOutput.*;
 
 public class Main {
-    private static final String HOST = "172.24.145.223";
+    private static final String HOST = "172.31.94.70";
     private static final String USERNAME = "admin";
     private static final String PASSWORD = "password";
     private static final String PROMPT = ">> ";
+    private static final Logger LOGGER = LoggerFactory.getLogger(Chat.class);
 
 
     public static void main(String[] args) throws IOException, TimeoutException {
@@ -44,7 +51,21 @@ public class Main {
                 String grupo = mensagemRecebida.getGrupo();
                 String destinatario = mensagemRecebida.getDestinatario();
 
-                synchronized (System.out) {
+                if (mensagemRecebida.getConteudo().getIsArquivo()) {
+                    try {
+                        Path directory = Paths.get("src/main/resources/recebidos");
+                        if (!Files.exists(directory)) {
+                            Files.createDirectories(directory);
+                        }
+                        Path filePath = directory.resolve(mensagemRecebida.getConteudo().getNome());
+                        Files.write(filePath, mensagemRecebida.getConteudo().getCorpo().toByteArray());
+                        System.out.println("\n(" + data + " às " + hora + ") Arquivo \"" + mensagemRecebida.getConteudo().getNome()
+                                + "\" recebido de " + imprimirDestinatarioOuGrupo(grupo, destinatario));
+                        System.out.print(imprimirDestinatarioOuGrupo(grupo, destinatario) + PROMPT);
+                    } catch (IOException e) {
+                        LOGGER.info(e.getMessage());
+                    }
+                } else {
                     if (!grupo.isEmpty()) {
                         System.out.println("\n(" + data + " às " + hora + ") " + sender + "#" + grupo + " diz: " + conteudo);
                         System.out.print("#" + grupo.concat(PROMPT));
@@ -61,11 +82,7 @@ public class Main {
 
         while (true) {
             if (!nomeDestinatario.isEmpty() ^ !nomeGrupo.isEmpty()) {
-                if (!nomeDestinatario.isEmpty()) {
-                    System.out.print("@");
-                } else {
-                    System.out.print("#");
-                }
+                imprimirTipoPromptCorreto(nomeDestinatario);
             }
             System.out.print(nomeDestinatario + nomeGrupo.concat(PROMPT));
             String entrada = lerLinha();
@@ -86,16 +103,16 @@ public class Main {
                     channel.basicConsume(nomeDestinatario, true, consumer);
                 }
             } else {
-                getComando(nomeUsuario, channel, entrada);
+                getComando(nomeUsuario, channel, entrada, nomeDestinatario, nomeGrupo);
 
                 if (!isComando(entrada) && (!nomeDestinatario.isEmpty() || !nomeGrupo.isEmpty())) {
                     MensagemOuterClass.Conteudo conteudo = MensagemOuterClass.Conteudo.newBuilder()
                             .setTipo(String.valueOf(MensagemOuterClass.Conteudo.TIPO_FIELD_NUMBER))
-                            .setCorpo(ByteString.copyFromUtf8(entrada)).build();
+                            .setCorpo(ByteString.copyFromUtf8(entrada)).setIsArquivo(false).build();
 
                     MensagemOuterClass.Mensagem mensagem = MensagemOuterClass.Mensagem.newBuilder()
                             .setEmissor(nomeUsuario)
-                            .setData(LocalDate.now().toString())
+                            .setData(LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")))
                             .setHora(LocalTime.now().toString())
                             .setDestinatario(nomeDestinatario)
                             .setGrupo(nomeGrupo)
