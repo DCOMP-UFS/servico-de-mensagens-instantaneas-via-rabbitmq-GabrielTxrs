@@ -33,6 +33,8 @@ public class Chat {
         try {
             channel.exchangeDeclare(nomeGrupo, "fanout");
             channel.queueBind(usuario, nomeGrupo, "");
+            channel.exchangeDeclare(nomeGrupo+"Arquivos", "fanout");
+            channel.queueBind(usuario, nomeGrupo+"Arquivos", "");
             System.out.println("O Usuario: " + usuario + " Criou o grupo: " + nomeGrupo);
         } catch (IOException e) {
             LOGGER.info(e.getMessage());

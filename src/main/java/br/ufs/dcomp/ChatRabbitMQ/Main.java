@@ -19,7 +19,8 @@ import static br.ufs.dcomp.ChatRabbitMQ.Chat.*;
 import static br.ufs.dcomp.ChatRabbitMQ.InputOutput.*;
 
 public class Main {
-    private static final String HOST = "172.31.94.70";
+    //    private static final String HOST = "172.31.94.70";
+    private static final String HOST = "172.24.145.223";
     private static final String USERNAME = "admin";
     private static final String PASSWORD = "password";
     private static final String PROMPT = ">> ";
@@ -51,32 +52,48 @@ public class Main {
                 String grupo = mensagemRecebida.getGrupo();
                 String destinatario = mensagemRecebida.getDestinatario();
 
+                if (!grupo.isEmpty()) {
+                    System.out.println("\n(" + data + " às " + hora + ") " + sender + "#" + grupo + " diz: " + conteudo);
+                    System.out.print("#" + grupo.concat(PROMPT));
+                } else {
+                    System.out.println("\n(" + data + " às " + hora + ") " + sender + "@" + destinatario + " diz: " + conteudo);
+                    System.out.print("@" + destinatario.concat(PROMPT));
+                }
+
+            }
+        };
+        if (channel.consumerCount(nomeUsuario) == 0) {
+            channel.basicConsume(nomeUsuario, true, consumer);
+        }
+
+        channel.queueDeclare(nomeUsuario + "Arquivo", false, false, false, null);
+        Consumer consumidorArquivos = new DefaultConsumer(channel) {
+            public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws InvalidProtocolBufferException {
+                MensagemOuterClass.Mensagem mensagemRecebida = MensagemOuterClass.Mensagem.parseFrom(body);
+                String data = mensagemRecebida.getData();
+                String hora = mensagemRecebida.getHora().substring(0, 5);
+                String grupo = mensagemRecebida.getGrupo();
+                String destinatario = mensagemRecebida.getDestinatario();
+                MensagemOuterClass.Conteudo conteudo = mensagemRecebida.getConteudo();
                 if (mensagemRecebida.getConteudo().getIsArquivo()) {
                     try {
                         Path directory = Paths.get("src/main/resources/recebidos");
                         if (!Files.exists(directory)) {
                             Files.createDirectories(directory);
                         }
-                        Path filePath = directory.resolve(mensagemRecebida.getConteudo().getNome());
-                        Files.write(filePath, mensagemRecebida.getConteudo().getCorpo().toByteArray());
-                        System.out.println("\n(" + data + " às " + hora + ") Arquivo \"" + mensagemRecebida.getConteudo().getNome()
+                        Path filePath = directory.resolve(conteudo.getNome());
+                        Files.write(filePath, conteudo.getCorpo().toByteArray());
+                        System.out.println("\n(" + data + " às " + hora + ") Arquivo \"" + conteudo.getNome()
                                 + "\" recebido de " + imprimirDestinatarioOuGrupo(grupo, destinatario));
                         System.out.print(imprimirDestinatarioOuGrupo(grupo, destinatario) + PROMPT);
                     } catch (IOException e) {
                         LOGGER.info(e.getMessage());
                     }
-                } else {
-                    if (!grupo.isEmpty()) {
-                        System.out.println("\n(" + data + " às " + hora + ") " + sender + "#" + grupo + " diz: " + conteudo);
-                        System.out.print("#" + grupo.concat(PROMPT));
-                    } else {
-                        System.out.println("\n(" + data + " às " + hora + ") " + sender + "@" + destinatario + " diz: " + conteudo);
-                        System.out.print("@" + destinatario.concat(PROMPT));
-                    }
                 }
             }
         };
-        channel.basicConsume(nomeUsuario, true, consumer);
+        channel.basicConsume(nomeUsuario + "Arquivo", true, consumidorArquivos);
+
         String nomeDestinatario = "";
         String nomeGrupo = "";
 
@@ -100,7 +117,9 @@ public class Main {
                     nomeDestinatario = parametros[0].substring(1);
                     nomeGrupo = "";
                     channel.queueDeclare(nomeDestinatario, false, false, false, null);
-                    channel.basicConsume(nomeDestinatario, true, consumer);
+                    if (channel.consumerCount(nomeDestinatario) == 0) {
+                        channel.basicConsume(nomeDestinatario, true, consumer);
+                    }
                 }
             } else {
                 getComando(nomeUsuario, channel, entrada, nomeDestinatario, nomeGrupo);
