@@ -66,7 +66,7 @@ public class Main {
             channel.basicConsume(nomeUsuario, true, consumer);
         }
 
-        channel.queueDeclare(nomeUsuario + "Arquivo", false, false, false, null);
+        channel.queueDeclare(nomeUsuario + "Arquivos", false, false, false, null);
         Consumer consumidorArquivos = new DefaultConsumer(channel) {
             public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws InvalidProtocolBufferException {
                 MensagemOuterClass.Mensagem mensagemRecebida = MensagemOuterClass.Mensagem.parseFrom(body);
@@ -84,15 +84,17 @@ public class Main {
                         Path filePath = directory.resolve(conteudo.getNome());
                         Files.write(filePath, conteudo.getCorpo().toByteArray());
                         System.out.println("\n(" + data + " às " + hora + ") Arquivo \"" + conteudo.getNome()
-                                + "\" recebido de " + imprimirDestinatarioOuGrupo(grupo, destinatario));
-                        System.out.print(imprimirDestinatarioOuGrupo(grupo, destinatario) + PROMPT);
+                                + "\" recebido de " + imprimirDestinatarioOuGrupo(grupo+"Arquivos", destinatario));
+                        System.out.print(imprimirDestinatarioOuGrupo(grupo+"Arquivos", destinatario) + PROMPT);
                     } catch (IOException e) {
                         LOGGER.info(e.getMessage());
                     }
                 }
             }
         };
-        channel.basicConsume(nomeUsuario + "Arquivo", true, consumidorArquivos);
+        if (channel.consumerCount(nomeUsuario+"Arquivos") == 0) {
+            channel.basicConsume(nomeUsuario+"Arquivos", true, consumidorArquivos);
+        }
 
         String nomeDestinatario = "";
         String nomeGrupo = "";

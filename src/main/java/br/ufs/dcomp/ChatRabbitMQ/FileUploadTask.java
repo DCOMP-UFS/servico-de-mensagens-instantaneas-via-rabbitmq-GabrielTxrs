@@ -57,11 +57,11 @@ public class FileUploadTask implements Runnable {
                     .setConteudo(conteudo).build();
 
             if (!mensagem.getGrupo().isEmpty()) {
-                System.out.println("\nEnviando " + caminhoArquivo + " para #" + nomeGrupo + " !");
-                channel.basicPublish(mensagem.getGrupo()+"Arquivo", "", null, mensagem.toByteArray());
+                System.out.println("\nEnviando " + caminhoArquivo + " para #" + mensagem.getGrupo()+"Arquivos" + " !");
+                channel.basicPublish(mensagem.getGrupo()+"Arquivos", "", null, mensagem.toByteArray());
             } else {
-                System.out.println("\nEnviando " + caminhoArquivo + " para @" + nomeDestinatario + " !");
-                channel.basicPublish("", mensagem.getDestinatario()+"Arquivo", null, mensagem.toByteArray());
+                System.out.println("\nEnviando " + caminhoArquivo + " para @" + mensagem.getDestinatario()+"Arquivos" + " !");
+                channel.basicPublish("", mensagem.getDestinatario()+"Arquivos", null, mensagem.toByteArray());
             }
         } catch (IOException e) {
             LOGGER.info(e.getMessage());
