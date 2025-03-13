@@ -33,8 +33,8 @@ public class Chat {
         try {
             channel.exchangeDeclare(nomeGrupo, "fanout");
             channel.queueBind(usuario, nomeGrupo, "");
-            channel.exchangeDeclare(nomeGrupo+"Arquivos", "fanout");
-            channel.queueBind(usuario, nomeGrupo+"Arquivos", "");
+            channel.exchangeDeclare(nomeGrupo + "Arquivos", "fanout");
+            channel.queueBind(usuario + "Arquivos", nomeGrupo + "Arquivos", "");
             System.out.println("O Usuario: " + usuario + " Criou o grupo: " + nomeGrupo);
         } catch (IOException e) {
             LOGGER.info(e.getMessage());
@@ -44,7 +44,7 @@ public class Chat {
     public static void adicionarUsuarioGrupo(String usuarioAdicionado, Channel channel, String nomeGrupo) {
         try {
             channel.queueBind(usuarioAdicionado, nomeGrupo, "");
-            channel.queueBind(usuarioAdicionado+"Arquivos", nomeGrupo, "");
+            channel.queueBind(usuarioAdicionado + "Arquivos", nomeGrupo + "Arquivos", "");
             System.out.println("Usuario: " + usuarioAdicionado + " adicionado ao grupo: " + nomeGrupo);
         } catch (IOException e) {
             LOGGER.info(e.getMessage());
@@ -54,7 +54,7 @@ public class Chat {
     public static void deletarGrupo(Channel channel, String nomeGrupo) {
         try {
             channel.exchangeDelete(nomeGrupo);
-            channel.exchangeDelete(nomeGrupo+"Arquivos");
+            channel.exchangeDelete(nomeGrupo + "Arquivos");
             System.out.println("Grupo deletado: " + nomeGrupo);
         } catch (IOException e) {
             LOGGER.info(e.getMessage());
@@ -64,7 +64,7 @@ public class Chat {
     public static void removerUsuarioGrupo(String usuarioRemovido, Channel channel, String nomeGrupo) {
         try {
             channel.queueUnbind(usuarioRemovido, nomeGrupo, "");
-            channel.queueUnbind(usuarioRemovido+"Arquivos", nomeGrupo, "");
+            channel.queueUnbind(usuarioRemovido + "Arquivos", nomeGrupo + "Arquivos", "");
         } catch (IOException e) {
             LOGGER.info(e.getMessage());
         }

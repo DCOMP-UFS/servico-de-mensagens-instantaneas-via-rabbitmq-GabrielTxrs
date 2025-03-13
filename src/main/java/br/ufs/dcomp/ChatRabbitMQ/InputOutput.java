@@ -71,7 +71,8 @@ public class InputOutput {
         }
     }
 
-    public static void getComando(String usuario, Channel channel, String entrada, String nomeDestinatario, String nomeGrupo) {
+    public static void getComando(String usuario, Channel channel, String entrada, String nomeDestinatario,
+                                  String nomeGrupo) {
         String[] parametros = entrada.split(" ");
         if (parametros[0].startsWith("!")) {
             switch (parametros[0].toLowerCase()) {
