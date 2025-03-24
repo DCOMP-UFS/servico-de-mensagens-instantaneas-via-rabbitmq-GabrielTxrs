@@ -6,6 +6,7 @@ import com.rabbitmq.client.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -20,9 +21,9 @@ import static br.ufs.dcomp.ChatRabbitMQ.InputOutput.*;
 
 public class Main {
     //    private static final String HOST = "172.31.94.70";
-    private static final String HOST = "172.24.145.223";
-    private static final String USERNAME = "admin";
-    private static final String PASSWORD = "password";
+    public static final String HOST = "172.24.145.223";
+    public static final String USERNAME = "admin";
+    public static final String PASSWORD = "password";
     private static final String PROMPT = ">> ";
     private static final Logger LOGGER = LoggerFactory.getLogger(Chat.class);
 
@@ -31,10 +32,15 @@ public class Main {
         Connection connection = iniciarConexao(HOST, USERNAME, PASSWORD);
         Channel channel = iniciarCanal(connection);
 
-        iniciarChat(channel);
+        try {
+            iniciarChat(channel);
+        } catch (EOFException e) {
+            throw new EOFException("CTRL + D pressed");
+        } finally {
+            channel.close();
+            connection.close();
+        }
 
-        channel.close();
-        connection.close();
     }
 
     public static void iniciarChat(Channel channel) throws IOException {

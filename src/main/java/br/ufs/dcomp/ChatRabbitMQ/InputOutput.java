@@ -3,6 +3,7 @@ package br.ufs.dcomp.ChatRabbitMQ;
 import com.google.protobuf.ByteString;
 import com.rabbitmq.client.Channel;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -11,9 +12,13 @@ import java.util.Scanner;
 import static br.ufs.dcomp.ChatRabbitMQ.Chat.*;
 
 public class InputOutput {
-    public static String lerLinha() {
+    public static String lerLinha() throws EOFException {
         Scanner scanner = new Scanner(System.in);
-        return scanner.nextLine();
+        if (scanner.hasNextLine()) {
+            return scanner.nextLine();
+        } else {
+            throw new EOFException("CTRL + D pressed");
+        }
     }
 
     public static String imprimirDestinatarioOuGrupo(String grupo, String destinatario) {
@@ -106,6 +111,15 @@ public class InputOutput {
                         enviarArquivo(channel, parametros[1], nomeDestinatario, nomeGrupo, usuario);
                     else
                         System.out.println("!upload <caminhoArquivo>");
+                    break;
+                case "!listusers":
+                    if (ValidarEntrada(parametros, 1))
+                        listarMembrosGrupo(parametros[1]);
+                    else
+                        System.out.println("!listUsers <nomeGrupo>");
+                    break;
+                case "!listgroups":
+                    listarGrupos(usuario);
                     break;
             }
         }
