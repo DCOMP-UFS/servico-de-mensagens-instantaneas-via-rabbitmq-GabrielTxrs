@@ -20,12 +20,12 @@ import static br.ufs.dcomp.ChatRabbitMQ.Chat.*;
 import static br.ufs.dcomp.ChatRabbitMQ.InputOutput.*;
 
 public class Main {
-    //    private static final String HOST = "172.31.94.70";
-    public static final String HOST = "172.24.145.223";
+    //    private static final String HOST = "172.24.145.223";
+    public static final String HOST = "172.21.29.186";
     public static final String USERNAME = "admin";
     public static final String PASSWORD = "password";
     private static final String PROMPT = ">> ";
-    private static final Logger LOGGER = LoggerFactory.getLogger(Chat.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
 
 
     public static void main(String[] args) throws IOException, TimeoutException {
@@ -90,16 +90,16 @@ public class Main {
                         Path filePath = directory.resolve(conteudo.getNome());
                         Files.write(filePath, conteudo.getCorpo().toByteArray());
                         System.out.println("\n(" + data + " às " + hora + ") Arquivo \"" + conteudo.getNome()
-                                + "\" recebido de " + imprimirDestinatarioOuGrupo(grupo+"Arquivos", destinatario));
-                        System.out.print(imprimirDestinatarioOuGrupo(grupo+"Arquivos", destinatario) + PROMPT);
+                                + "\" recebido de " + imprimirDestinatarioOuGrupo(grupo + "Arquivos", destinatario));
+                        System.out.print(imprimirDestinatarioOuGrupo(grupo + "Arquivos", destinatario) + PROMPT);
                     } catch (IOException e) {
                         LOGGER.info(e.getMessage());
                     }
                 }
             }
         };
-        if (channel.consumerCount(nomeUsuario+"Arquivos") == 0) {
-            channel.basicConsume(nomeUsuario+"Arquivos", true, consumidorArquivos);
+        if (channel.consumerCount(nomeUsuario + "Arquivos") == 0) {
+            channel.basicConsume(nomeUsuario + "Arquivos", true, consumidorArquivos);
         }
 
         String nomeDestinatario = "";
